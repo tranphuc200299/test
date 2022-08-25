@@ -30,7 +30,7 @@
                         @foreach($list as $log)
                             <tr>
                                 <td class="v-align-middle text-center">
-                                    <input type="checkbox" id="delete-log" value="{{$log->id}}">
+                                    <input type="checkbox" id="checkBox_delete" value="{{$log->id}}">
                                 </td>
                                 <td class="v-align-middle text-center">{{ $loop->iteration }}</td>
                                 <td class="v-align-middle text-center" id="UserId">{{$log->id}}</td>
@@ -75,7 +75,7 @@
 @endsection
 @push('custom-scripts')
     <script>
-        $(function() {
+        $(function () {
 
             $('.date-filter').daterangepicker({
                 autoUpdateInput: false,
@@ -84,46 +84,71 @@
                 }
             });
 
-            $('.date-filter').on('apply.daterangepicker', function(ev, picker) {
+            $('.date-filter').on('apply.daterangepicker', function (ev, picker) {
                 $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
             });
 
-            $('.date-filter').on('cancel.daterangepicker', function(ev, picker) {
+            $('.date-filter').on('cancel.daterangepicker', function (ev, picker) {
                 $(this).val('');
             });
 
-            $("input:checkbox").on( "click", function() {
-                $('.btn-delete-list').removeAttr('disabled');
+            $("input:checkbox").change(function () {
+                let $this = $(this);
+                if ($this.is(":checked")) {
+                    $('.btn-delete-list').removeAttr('disabled');
+                } else {
+                    $('.btn-delete-list').attr('disabled', 'disabled');
+                }
             });
-
-            $( "#delete-log" ).on( "click", function() {
-                event.preventDefault();
-                let dataId = [];
-                $("input:checkbox").each(function(){
-                    let $this = $(this);
-                    if($this.is(":checked")){
-                        $('.btn-delete-list').removeAttr('disabled');
-                        dataId.push($this.val());
+            //handel delete checkbox log
+            $(document).on('click', '#delete-log', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Có X bản ghi được chọn ',
+                    text: "Bạn có muốn xóa những bản ghi này không!",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then((result) => {
+                    if (result.value) {
+                        let dataId = [];
+                        $("input:checkbox").each(function () {
+                            let $this = $(this);
+                            if ($this.is(":checked")) {
+                                dataId.push($this.val());
+                            }
+                        });
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            "url": '{{ route('cp.logs.destroy') }}',
+                            "method": "POST",
+                            data: {
+                                id: dataId,
+                            },
+                            success: function (data) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'Your file has been deleted.',
+                                    'success',
+                                ).then((result) => {
+                                    if (result.value) {
+                                        location.reload();
+                                    }
+                                })
+                            }, error: function (error) {
+                                console.log(error);
+                            }
+                        });
                     }
-                });
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.ajax({
-                    "url": '{{ route('cp.logs.destroy') }}',
-                    "method": "POST",
-                    data: {
-                        id: dataId,
-                    },
-                    success: function(data) {
-                        location.reload();
-                    }, error: function (error) {
-                        console.log(error);
-                    }
-                });
-            });
+                })
+            })
         });
     </script>
 @endpush

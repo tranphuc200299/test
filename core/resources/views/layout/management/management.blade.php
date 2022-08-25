@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="ja">
 <head>
     <title>@yield('title', trans('core::text.Admin'))</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
