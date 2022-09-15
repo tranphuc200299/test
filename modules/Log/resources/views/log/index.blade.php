@@ -156,18 +156,18 @@
                         "土"
                     ],
                     "monthNames": [
-                        "一月",
-                        "二月",
-                        "三月",
-                        "四月",
-                        "五月",
-                        "六月",
-                        "七月",
-                        "八月",
-                        "九月",
-                        "十月",
-                        "十一月",
-                        "十二月"
+                        "1月",
+                        "2月",
+                        "3月",
+                        "4月",
+                        "5月",
+                        "6月",
+                        "7月",
+                        "8月",
+                        "9月",
+                        "10月",
+                        "11月",
+                        "12月"
                     ],
                     applyLabel: "選択",
                     cancelLabel: "クリア",
@@ -232,6 +232,7 @@
                                     Swal.fire(
                                         {
                                             type: 'success',
+                                            allowOutsideClick: false,
                                             text: `${data.message}`,
                                         }
                                     ).then((result) => {
@@ -324,7 +325,7 @@
                             if (data.image_erorr.length > 0) {
                                 let textHTML = `以下の画像は破壊しているため、ダウンロードできません<br>
                                                 破壊されない他の画像をダウンロードしますか。
-                                                <ul class='error-download'>`;
+                                                <ul class='error-download mt-4'>`;
 
                                 $.each(data.image_erorr, function (index, value) {
                                     textHTML += `<li>${value}</li>`;
@@ -371,6 +372,10 @@
                 })
             }, 500);
         });
+
+        setTimeout(function() {
+            $('.alert-danger').fadeOut(500);
+        }, 2000);
 
     </script>
 @endpush

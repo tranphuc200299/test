@@ -22,6 +22,9 @@ class LogController extends Controller
         Breadcrumb::push(trans('log::text.log management home'), route('cp.logs.index'));
         $assign['list'] = $this->logService->getAll(['with_load' => 'customer']);
 
+        if ($assign['list']->currentPage() > $assign['list']->lastPage())
+            return redirect()->route('cp.logs.index', ['page' => $assign['list']->lastPage()]);
+
         return view('log::log.index', $assign);
     }
 
@@ -51,6 +54,7 @@ class LogController extends Controller
         $this->logService->export();
         die;
     }
+
     public function download()
     {
         return $this->logService->download();

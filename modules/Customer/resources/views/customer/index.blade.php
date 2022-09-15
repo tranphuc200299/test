@@ -91,6 +91,11 @@
 @push('custom-scripts')
     <script>
         $(function () {
+
+            setTimeout(function() {
+                $('.alert-danger').fadeOut(2000);
+            }, 2000);
+
             $("input[name='deleteItem']").change(function () {
                 let $this = $(this);
                 if ($("input[name='deleteItem']").is(":checked")) {
@@ -100,7 +105,7 @@
                 }
             });
             //handel delete checkbox log
-            $(document).on('click', '#delete-customer', function (e) {
+            $('#delete-customer').on('click', function (e) {
                 e.preventDefault();
                 let dataId = [];
                 $("input[name='deleteItem']").each(function () {
@@ -109,7 +114,6 @@
                         dataId.push($this.val());
                     }
                 });
-                console.log(dataId);
                 Swal.fire({
                     text: `${dataId.length}件が選択されています。削除する際にユーザーデータも削除されます。削除してもよろしいですか。。`,
                     type: 'warning',
@@ -138,6 +142,7 @@
                                     Swal.fire(
                                         {
                                             type: 'success',
+                                            allowOutsideClick: false,
                                             text: `${data.message}`,
                                         }
 

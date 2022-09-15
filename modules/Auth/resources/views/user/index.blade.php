@@ -50,16 +50,16 @@
                                     {{($users->currentpage()-1)*$users->perpage()+ $key + 1}}
                                 </td>
                                 <td class="v-align-middle  text-center">{{ $user->full_name }}</td>
-                                <td class="v-align-middle">{{ $user->user_name }}</td>
-                                <td class="v-align-middle  text-center">{{ $user->created_at }}</td>
-                                <td class="v-align-middle  text-center">{{ $user->updated_at }}</td>
+                                <td class="v-align-middle  text-center">{{ $user->user_name }}</td>
+                                <td class="v-align-middle  text-center">{{ $user->created_at->format('Y/m/d H:i:s') }}</td>
+                                <td class="v-align-middle  text-center">{{ $user->updated_at->format('Y/m/d H:i:s') }}</td>
                                 <td class="v-align-middle  text-center">
                                     @can('delete', $user)
                                         <form action="{{route('cp.users.destroy', $user->id)}}"
                                               class="d-inline form-delete" method="POST">
                                             @method('DELETE')
                                             @csrf
-                                            <button class="btn btn-danger btn-xs user-delete-disable" type="submit">
+                                            <button class="btn btn-danger btn-xs user-delete-disable button-delete" type="button">
                                                 {{ trans('core::common.delete') }}
                                             </button>
                                         </form>
@@ -107,14 +107,18 @@
 @push('custom-scripts')
     <script>
         $(function () {
-            var formMessages = $('#form-messages');
             //handel delete checkbox log
-            $('.form-delete').one('submit', function (e) {
-                let self = $(this);
-                // var id = $(this).data('id');
+
+            setTimeout(function() {
+                $('.alert-danger').fadeOut(2000);
+                $('.alert-success').fadeOut(2000);
+            }, 2000);
+
+            $('.button-delete').on('click', function (e) {
+                let self = $('.button-delete').parent();
                 e.preventDefault();
                 Swal.fire({
-                    text: "を削除してもよろしいですか?",
+                    text: "削除してもよろしいですか? ",
                     type: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',

@@ -4,12 +4,9 @@ namespace Modules\Auth\Http\Controllers\Web;
 
 use Core\Facades\Breadcrumb\Breadcrumb;
 use Core\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Modules\Auth\Constants\AuthConst;
-use Modules\Auth\Entities\Mail\NewAccount;
 use Modules\Auth\Entities\Models\Role;
 use Modules\Auth\Entities\Models\User;
 use Modules\Auth\Http\Requests\UserRequest;
@@ -28,6 +25,8 @@ class UserController extends Controller
     {
         Breadcrumb::push(trans('auth::text.auth list_user'), route('cp.users.index'));
         $assign['users'] = $this->userService->getAll();
+        if ($assign['users']->currentPage() > $assign['users']->lastPage())
+            return redirect()->route('cp.users.index', ['page' => $assign['users']->lastPage()]);
 
         return view('auth::user.index', $assign);
     }
@@ -63,7 +62,7 @@ class UserController extends Controller
     {
         $data = $request->only(['full_name', 'user_name', 'password']);
         $data['password'] = Hash::make($data['password']);
-        $fullName = $data['full_name'];
+        $userName = $data['user_name'];
 
         /* @var $user User */
         $user = $this->userService->create($data);
@@ -73,7 +72,7 @@ class UserController extends Controller
 //            $password = $data['password'] ?? $this->userService->makePassword();
             $user->assignRole($request->get('role_id'));
 
-            return redirect()->route('cp.users.index')->with('success', $fullName . trans('core::message.notify.create success'));
+            return redirect()->route('cp.users.index')->with('success', $userName . trans('core::message.notify.create success'));
         }
 
         return redirect()->route('cp.users.index');
@@ -94,7 +93,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $idLogin = Auth::id();
-        Breadcrumb::push(($idLogin == $id) ?  'プロフィール設定' : 'アカウント編集' , '');
+        Breadcrumb::push(($idLogin == $id) ? 'プロフィール設定' : 'アカウント編集', '');
         /* @var $assign ['user'] User */
         $assign['user'] = $this->userService->findOr404($id);
 
@@ -130,20 +129,18 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        $assign['user'] = $this->userService->findOr404($id);
-        $fullName = $assign['user']->full_name;
-        $assign['user']->loadMissing('roles');
-
-//        if (!in_array(AuthConst::ROLE_SUPER_ADMIN, $assign['user']->roles->pluck('name')->toArray())) {
-//            $assign['user']->delete();
-//        }
+        $assign['user'] = $this->userService->find($id);
         $count = $this->userService->getAll()->count();
-
-        if ($count > 1) {
-            $assign['user']->delete();
+        if ($assign['user']) {
+            $count = $this->userService->getAll()->count();
+            $assign['user']->loadMissing('roles');
+            $fullName = $assign['user']['user_name'];
+            if ($count > 0) {
+                $assign['user']->delete();
+            }
+            return redirect()->back()->with('fail', $fullName . trans('core::message.notify.delete success'));
+        }  else {
+            return redirect()->back()->with('fail', trans('core::message.notify.delete user_fail'));
         }
-
-
-        return redirect()->route('cp.users.index')->with('fail', $fullName . trans('core::message.notify.delete success'));
     }
 }

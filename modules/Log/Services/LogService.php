@@ -42,7 +42,10 @@ class LogService extends BaseService
                 })->when($this->filter->has('gender'), function ($q) {
                     $q->where('gender', $this->filter->get('gender'));
                 })->when($this->filter->has('id'), function ($q) {
-                    $q->where('id', 'LIKE', cxl_replaceStringID($this->filter->get('id')) . "%");
+                    $q->where(function ($queryId) {
+                        $queryId->where('id', 'LIKE', cxl_replaceStringID($this->filter->get('id')) . "%");
+                        $queryId->orWhere('id', 'LIKE', "%" . ($this->filter->get('id')) . "%");
+                    });
                 });
             })->orderByDesc('created_at');
 
