@@ -7,7 +7,7 @@ stages:
 
 .only-default: &only-default
   only:
-    - dev
+    - master
 
 .init_ssh: &init_ssh |
   eval $(ssh-agent -s)
